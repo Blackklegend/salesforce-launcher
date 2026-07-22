@@ -57,6 +57,14 @@ The primary action opens the selected org. The action panel also includes:
 
 Copy actions for usernames, org IDs, instance URLs, and additional aliases appear only when those values exist.
 
+## Move authenticated orgs to another Mac
+
+Run **Export Salesforce Org Credentials**, select the orgs you want, choose a parent directory, and confirm the security warning. Exportable non-scratch orgs are selected initially; scratch orgs are listed but unselected. SF Orgs creates a new owner-only folder containing one `.authurl` credential file per selected org and a matching `.alias` file when an alias exists. The folder path—not its contents—is copied to the clipboard.
+
+Copy that folder through a secure channel, then run **Import Salesforce Org Credentials** on the destination Mac. You can select one or more export folders or `.authurl` files, paste an absolute path or `file://` link, use a Finder-copied file directly from the clipboard, or paste a `force://` SFDX auth URL into the concealed field. Direct auth URLs are placed in a temporary owner-only file and removed immediately after Salesforce CLI reads it. Import uses Salesforce CLI's supported `sf org login sfdx-url --sfdx-url-file` flow. You can optionally delete each source credential and alias file immediately after its org imports successfully; files for failed imports are retained.
+
+> **Security warning:** An `.authurl` file is a full-access credential, equivalent to a password and token. Never commit or upload an export. Keep it in a password vault, encrypted disk, or similarly protected channel, and delete it after the migration. Some authentication types, including JWT/certificate-based authorization, do not expose an SFDX auth URL and are skipped.
+
 ## Requirements
 
 - macOS
@@ -159,4 +167,4 @@ The test suite uses fixtures and mocked process execution. It never reads a deve
 
 ## Privacy
 
-SF Orgs runs entirely on your Mac. It does not call Salesforce APIs directly, transmit org metadata to another service, display session IDs, or manage authentication. Salesforce CLI remains the authority for authentication and URL generation.
+SF Orgs runs entirely on your Mac. It does not call Salesforce APIs directly, transmit org metadata or credentials to another service, or display session IDs. Salesforce CLI remains the authority for authentication and URL generation. Credential export and import happen only when explicitly invoked and confirmed; auth URLs are written directly to owner-only files and are never cached, logged, or copied to the clipboard.

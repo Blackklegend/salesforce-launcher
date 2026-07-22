@@ -84,6 +84,7 @@ export function sanitizeUserFacingMessage(message: string): string {
   const firstLine = message.trim().split(/\r?\n/, 1)[0] ?? "";
   const withoutUrls = firstLine.replace(/https:\/\/[^\s"'<>]+/gi, "[Salesforce URL]");
   const withoutTokens = withoutUrls
+    .replace(/force:\/\/[^\s"'<>]+/gi, "[SFDX auth URL redacted]")
     .replace(/00D[A-Za-z0-9]{12,15}![.A-Za-z0-9_-]+/g, "[redacted]")
     .replace(/Bearer\s+[^\s"'<>]+/gi, "Bearer [redacted]")
     .replace(/sid=[^&\s"'<>]+/gi, "sid=[redacted]");

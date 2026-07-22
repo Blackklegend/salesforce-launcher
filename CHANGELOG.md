@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add no-view Quick Open with deterministic alias and username resolution.
 - Add Root Search fallback support for direct launch and prefiltered browsing.
@@ -9,3 +9,4 @@
 - Add safe CLI execution, HTTPS URL validation, stale-auth feedback, and a 45-second encrypted metadata cache.
 - Add parser, resolver, discovery, execution, classification, and cache tests.
 - Add an original SF Orgs extension icon and complete usage and troubleshooting documentation.
+- Add confirmed, local export and import commands for migrating SFDX auth URL credentials, with per-org export selection, restrictive file permissions, scratch-org opt-in, alias restoration, safe clipboard imports, and optional post-import deletion.

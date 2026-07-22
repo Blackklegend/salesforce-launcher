@@ -5,6 +5,7 @@ import { parseAuthenticatedOrgsResponse } from "./org-parser";
 
 const LIST_TIMEOUT_MS = 15_000;
 const OPEN_TIMEOUT_MS = 30_000;
+const AUTH_TIMEOUT_MS = 30_000;
 
 export async function listAuthenticatedOrgsWithCli(
   cliPath: string,
@@ -66,6 +67,60 @@ export async function openOrgPrivatelyWithCli(
   } catch (error) {
     throw mapCliError(error);
   }
+}
+
+export async function revealSfdxAuthUrlWithCli(
+  cliPath: string,
+  targetOrg: string,
+  runner: ExecutableRunner = runExecutable,
+): Promise<string> {
+  const target = targetOrg.trim();
+  if (!target) throw new SalesforceLauncherError("CLI_FAILED", "The org target is empty.");
+
+  try {
+    const { stdout } = await runner(cliPath, ["org", "auth", "show-sfdx-auth-url", "--target-org", target, "--json"], {
+      timeoutMs: AUTH_TIMEOUT_MS,
+    });
+    const response = parseCliJson(stdout);
+    const authUrl = findSfdxAuthUrl(response);
+    if (!authUrl) {
+      throw new SalesforceLauncherError("CLI_FAILED", "Salesforce CLI did not return an SFDX auth URL.");
+    }
+    return authUrl;
+  } catch (error) {
+    throw mapCliError(error);
+  }
+}
+
+export async function loginWithSfdxAuthFileWithCli(
+  cliPath: string,
+  authFile: string,
+  options: { alias?: string; runner?: ExecutableRunner } = {},
+): Promise<void> {
+  const arguments_ = ["org", "login", "sfdx-url", "--sfdx-url-file", authFile, "--json"];
+  if (options.alias?.trim()) arguments_.push("--alias", options.alias.trim());
+
+  try {
+    await (options.runner ?? runExecutable)(cliPath, arguments_, { timeoutMs: AUTH_TIMEOUT_MS });
+  } catch (error) {
+    throw mapCliError(error);
+  }
+}
+
+function findSfdxAuthUrl(value: unknown): string | undefined {
+  if (typeof value === "string") return value.startsWith("force://") ? value : undefined;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = findSfdxAuthUrl(item);
+      if (found) return found;
+    }
+  } else if (isRecord(value)) {
+    for (const item of Object.values(value)) {
+      const found = findSfdxAuthUrl(item);
+      if (found) return found;
+    }
+  }
+  return undefined;
 }
 
 function parseCliJson(stdout: string): unknown {

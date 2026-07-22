@@ -4,7 +4,9 @@ import { buildSafeCliEnvironment, ExecutableError, ExecutableRunner } from "../s
 import {
   generateOrgUrlWithCli,
   listAuthenticatedOrgsWithCli,
+  loginWithSfdxAuthFileWithCli,
   openOrgPrivatelyWithCli,
+  revealSfdxAuthUrlWithCli,
 } from "../services/salesforce-cli";
 import { SalesforceLauncherError } from "../utils/errors";
 
@@ -77,7 +79,11 @@ describe("Salesforce CLI service", () => {
     const failedRunner = vi
       .fn<ExecutableRunner>()
       .mockRejectedValue(
-        new ExecutableError("", "Failed at https://example.my.salesforce.com/secur/frontdoor.jsp?sid=secret", false),
+        new ExecutableError(
+          "",
+          "Failed at https://example.my.salesforce.com/secur/frontdoor.jsp?sid=secret force://client:secret:token@example.com",
+          false,
+        ),
       );
 
     try {
@@ -87,6 +93,7 @@ describe("Salesforce CLI service", () => {
       expect(error).toBeInstanceOf(SalesforceLauncherError);
       expect((error as Error).message).not.toContain("frontdoor");
       expect((error as Error).message).not.toContain("secret");
+      expect((error as Error).message).not.toContain("force://");
     }
   });
 
@@ -100,6 +107,31 @@ describe("Salesforce CLI service", () => {
     await expect(listAuthenticatedOrgsWithCli("/bin/sf", runner)).rejects.toMatchObject({
       code: "KEYCHAIN_ACCESS_DENIED",
     });
+  });
+
+  it("reveals an SFDX auth URL only from structured CLI output", async () => {
+    const runner = jsonRunner({ status: 0, result: { sfdxAuthUrl: "force://client:secret:token@example.com" } });
+
+    await expect(revealSfdxAuthUrlWithCli("/bin/sf", "dev@example.com", runner)).resolves.toBe(
+      "force://client:secret:token@example.com",
+    );
+    expect(runner).toHaveBeenCalledWith(
+      "/bin/sf",
+      ["org", "auth", "show-sfdx-auth-url", "--target-org", "dev@example.com", "--json"],
+      { timeoutMs: 30_000 },
+    );
+  });
+
+  it("imports credentials by file path without putting their contents in arguments", async () => {
+    const runner = vi.fn<ExecutableRunner>().mockResolvedValue({ stdout: "", stderr: "" });
+
+    await loginWithSfdxAuthFileWithCli("/bin/sf", "/secure/dev.authurl", { alias: "dev", runner });
+
+    expect(runner).toHaveBeenCalledWith(
+      "/bin/sf",
+      ["org", "login", "sfdx-url", "--sfdx-url-file", "/secure/dev.authurl", "--json", "--alias", "dev"],
+      { timeoutMs: 30_000 },
+    );
   });
 
   it("forces a secret-safe child environment and removes ambient paths", () => {

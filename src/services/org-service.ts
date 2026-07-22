@@ -3,7 +3,13 @@ import { getPreferenceValues, open } from "@raycast/api";
 import { SalesforceOrg, getOrgTarget } from "../models/salesforce-org";
 import { findSalesforceCliPath } from "./cli-discovery";
 import { readAuthenticatedOrgCache, writeAuthenticatedOrgCache } from "./org-cache";
-import { generateOrgUrlWithCli, listAuthenticatedOrgsWithCli, openOrgPrivatelyWithCli } from "./salesforce-cli";
+import {
+  generateOrgUrlWithCli,
+  listAuthenticatedOrgsWithCli,
+  loginWithSfdxAuthFileWithCli,
+  openOrgPrivatelyWithCli,
+  revealSfdxAuthUrlWithCli,
+} from "./salesforce-cli";
 
 interface SalesforcePreferences {
   sfPath?: string;
@@ -52,6 +58,16 @@ export async function openSalesforceOrg(org: SalesforceOrg, path?: string): Prom
 export async function openSalesforceOrgPrivately(org: SalesforceOrg, path?: string): Promise<void> {
   const cliPath = await getCliPath();
   await openOrgPrivatelyWithCli(cliPath, getOrgTarget(org), { path });
+}
+
+export async function revealSfdxAuthUrl(org: SalesforceOrg): Promise<string> {
+  const cliPath = await getCliPath();
+  return revealSfdxAuthUrlWithCli(cliPath, getOrgTarget(org));
+}
+
+export async function loginWithSfdxAuthFile(authFile: string, alias?: string): Promise<void> {
+  const cliPath = await getCliPath();
+  await loginWithSfdxAuthFileWithCli(cliPath, authFile, { alias });
 }
 
 async function getCliPath(): Promise<string> {

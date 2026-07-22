@@ -18,7 +18,6 @@
     {
       "name": "search-orgs",
       "title": "Browse Salesforce Orgs",
-      "subtitle": "Search local Salesforce CLI authorizations",
       "description": "Browse and open orgs authenticated with Salesforce CLI",
       "mode": "view",
       "keywords": [
@@ -33,7 +32,6 @@
     {
       "name": "launch-org",
       "title": "Open Salesforce Org",
-      "subtitle": "Jump straight to an authenticated org",
       "description": "Open a Salesforce org by alias or username",
       "mode": "no-view",
       "keywords": [
@@ -50,6 +48,34 @@
           "type": "text",
           "required": true
         }
+      ]
+    },
+    {
+      "name": "export-sf-orgs",
+      "title": "Export Salesforce Org Credentials",
+      "description": "Export authenticated Salesforce orgs to an owner-only credential folder",
+      "mode": "view",
+      "keywords": [
+        "sf",
+        "salesforce",
+        "org",
+        "export",
+        "backup",
+        "migrate"
+      ]
+    },
+    {
+      "name": "import-sf-orgs",
+      "title": "Import Salesforce Org Credentials",
+      "description": "Import Salesforce org credentials from a previous SF Orgs export",
+      "mode": "view",
+      "keywords": [
+        "sf",
+        "salesforce",
+        "org",
+        "import",
+        "restore",
+        "migrate"
       ]
     }
   ],
