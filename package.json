@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "salesforce-launcher",
+  "title": "SF Orgs",
+  "description": "Quickly browse and open Salesforce CLI-authenticated orgs",
+  "icon": "sf-orgs-icon.png",
+  "author": "bl4ckk",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-orgs",
+      "title": "Browse Salesforce Orgs",
+      "subtitle": "Search local Salesforce CLI authorizations",
+      "description": "Browse and open orgs authenticated with Salesforce CLI",
+      "mode": "view",
+      "keywords": [
+        "sf",
+        "salesforce",
+        "org",
+        "sandbox",
+        "scratch",
+        "devhub"
+      ]
+    },
+    {
+      "name": "launch-org",
+      "title": "Open Salesforce Org",
+      "subtitle": "Jump straight to an authenticated org",
+      "description": "Open a Salesforce org by alias or username",
+      "mode": "no-view",
+      "keywords": [
+        "sf",
+        "salesforce",
+        "org",
+        "open",
+        "launch"
+      ],
+      "arguments": [
+        {
+          "name": "org",
+          "placeholder": "Alias or username",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sfPath",
+      "title": "Salesforce CLI Path",
+      "description": "Absolute path to the sf executable. Leave empty to detect it automatically.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/sf"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.20.1",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
