@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SalesforceOrg } from "../models/salesforce-org";
 import {
+  discoverImportableAuthFiles,
   exportOrgAuthFiles,
   importOrgAuthFiles,
   importSfdxAuthUrls,
@@ -61,11 +62,36 @@ describe("org auth transfer", () => {
     const result = await importOrgAuthFiles(directory, { deleteAfterImport: true });
 
     expect(result).toMatchObject({ succeeded: 1, skipped: 1, cleanupFailed: 0 });
+    expect(result.failures).toEqual(["bad.authurl"]);
     expect(loginWithSfdxAuthFile).toHaveBeenCalledWith(join(directory, "good.authurl"), "dev");
     await expect(stat(join(directory, "good.authurl"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(stat(join(directory, "good.alias"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(stat(join(directory, "bad.authurl"))).resolves.toBeDefined();
     expect(clearAuthenticatedOrgCache).toHaveBeenCalledOnce();
+  });
+
+  it("identifies a failed import by alias when one is available", async () => {
+    const directory = await createTemporaryDirectory();
+    await writeFile(join(directory, "broken.authurl"), "force://broken");
+    await writeFile(join(directory, "broken.alias"), "staging\n");
+    vi.mocked(loginWithSfdxAuthFile).mockRejectedValue(new Error("failed"));
+
+    const result = await importOrgAuthFiles(directory);
+
+    expect(result.failures).toEqual(["staging"]);
+  });
+
+  it("discovers credential files for review with their aliases", async () => {
+    const directory = await createTemporaryDirectory();
+    await writeFile(join(directory, "second.authurl"), "force://second");
+    await writeFile(join(directory, "first.authurl"), "force://first");
+    await writeFile(join(directory, "first.alias"), "development\n");
+    await writeFile(join(directory, "notes.txt"), "ignored");
+
+    await expect(discoverImportableAuthFiles(directory)).resolves.toEqual([
+      { path: join(directory, "first.authurl"), name: "first.authurl", alias: "development" },
+      { path: join(directory, "second.authurl"), name: "second.authurl", alias: undefined },
+    ]);
   });
 
   it("imports a pasted auth URL through a temporary file and removes it", async () => {

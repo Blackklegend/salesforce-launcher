@@ -16,6 +16,12 @@ export interface AuthTransferResult {
   failures: string[];
 }
 
+export interface ImportableAuthFile {
+  path: string;
+  name: string;
+  alias?: string;
+}
+
 export async function exportOrgAuthFiles(
   orgs: SalesforceOrg[],
   outputDirectory: string,
@@ -61,7 +67,7 @@ export async function importOrgAuthFiles(
       await loginWithSfdxAuthFile(authFile, alias);
     } catch {
       result.skipped++;
-      result.failures.push(basename(authFile));
+      result.failures.push(alias || basename(authFile));
       continue;
     }
 
@@ -78,6 +84,21 @@ export async function importOrgAuthFiles(
 
   if (result.succeeded > 0) await clearAuthenticatedOrgCache();
   return result;
+}
+
+export async function discoverImportableAuthFiles(inputLocations: string | string[]): Promise<ImportableAuthFile[]> {
+  const authFiles = await collectAuthFiles(Array.isArray(inputLocations) ? inputLocations : [inputLocations]);
+  return Promise.all(
+    authFiles.map(async (path) => {
+      const name = basename(path);
+      const stem = name.slice(0, -".authurl".length);
+      return {
+        path,
+        name,
+        alias: await readOptionalAlias(join(dirname(path), `${stem}.alias`)),
+      };
+    }),
+  );
 }
 
 export async function importSfdxAuthUrls(authUrls: string[]): Promise<AuthTransferResult> {
