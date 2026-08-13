@@ -10,3 +10,6 @@
 - Add parser, resolver, discovery, execution, classification, and cache tests.
 - Add an original SF Orgs extension icon and complete usage and troubleshooting documentation.
 - Add confirmed, local export and import commands for migrating SFDX auth URL credentials, with per-org export and per-file import selection, restrictive file permissions, scratch-org opt-in, alias restoration, safe clipboard imports, and optional post-import deletion.
+- Fix sandbox classification when Salesforce CLI incorrectly reports `isSandbox: false` for a sandbox hostname.
+- Add locally persisted org display names with rename and reset actions.
+- Add a preference to place Sandboxes before or after Production in the browse list.

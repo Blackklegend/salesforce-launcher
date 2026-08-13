@@ -87,6 +87,24 @@
       "type": "textfield",
       "required": false,
       "placeholder": "/opt/homebrew/bin/sf"
+    },
+    {
+      "name": "environmentSectionOrder",
+      "title": "Environment Section Order",
+      "description": "Choose which environment section appears first when browsing orgs.",
+      "type": "dropdown",
+      "required": true,
+      "default": "sandboxes-first",
+      "data": [
+        {
+          "title": "Sandboxes Before Production",
+          "value": "sandboxes-first"
+        },
+        {
+          "title": "Production Before Sandboxes",
+          "value": "production-first"
+        }
+      ]
     }
   ],
   "dependencies": {

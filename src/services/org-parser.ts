@@ -85,7 +85,12 @@ function normalizeOrg({ value, source }: RawOrgEntry): SalesforceOrg | undefined
     readBoolean(value.isScratchOrg) ?? readBoolean(value.isScratch) ?? source.toLowerCase().includes("scratch");
   const isDevHub = readBoolean(value.isDevHub) ?? source.toLowerCase().includes("devhub");
   const explicitSandbox = readBoolean(value.isSandbox);
-  const isSandbox = explicitSandbox ?? inferSandbox(instanceUrl);
+  const inferredSandbox = inferSandbox(instanceUrl);
+  // Some Salesforce CLI authorizations incorrectly report `isSandbox: false`
+  // even though their canonical instance host is under sandbox.my.salesforce.com.
+  // A sandbox hostname is authoritative positive evidence; otherwise retain the
+  // CLI value instead of guessing that an unknown org is production.
+  const isSandbox = inferredSandbox === true ? true : explicitSandbox;
   const authorizationError = readString(value.error);
 
   return {
@@ -133,7 +138,7 @@ function deduplicateOrgs(orgs: SalesforceOrg[]): SalesforceOrg[] {
       isDefaultDevHub: existing.isDefaultDevHub || org.isDefaultDevHub,
       isDevHub: existing.isDevHub || org.isDevHub,
       isScratchOrg: existing.isScratchOrg || org.isScratchOrg,
-      isSandbox: existing.isSandbox ?? org.isSandbox,
+      isSandbox: existing.isSandbox === true || org.isSandbox === true ? true : (existing.isSandbox ?? org.isSandbox),
       isExpired: existing.isExpired === true || org.isExpired === true ? true : (existing.isExpired ?? org.isExpired),
       authorizationError: existing.authorizationError ?? org.authorizationError,
     });

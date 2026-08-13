@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { SalesforceOrg } from "../models/salesforce-org";
-import { classifyOrg } from "../services/org-classifier";
+import { classifyOrg, getOrgSectionOrder } from "../services/org-classifier";
 
 describe("classifyOrg", () => {
   it("uses deterministic precedence without guessing unknown production orgs", () => {
@@ -12,6 +12,25 @@ describe("classifyOrg", () => {
     expect(classifyOrg(org({ isSandbox: false }))).toBe("Production");
     expect(classifyOrg(org({ isDevHub: true }))).toBe("Dev Hubs");
     expect(classifyOrg(org({}))).toBe("Other");
+  });
+
+  it("can place production before or after sandboxes", () => {
+    expect(getOrgSectionOrder("sandboxes-first")).toEqual([
+      "Default",
+      "Scratch Orgs",
+      "Sandboxes",
+      "Production",
+      "Dev Hubs",
+      "Other",
+    ]);
+    expect(getOrgSectionOrder("production-first")).toEqual([
+      "Default",
+      "Scratch Orgs",
+      "Production",
+      "Sandboxes",
+      "Dev Hubs",
+      "Other",
+    ]);
   });
 });
 

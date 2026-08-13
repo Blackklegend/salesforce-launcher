@@ -63,6 +63,34 @@ describe("parseAuthenticatedOrgsResponse", () => {
     expect(orgs.find((org) => org.aliases.includes("feature-x"))?.isScratchOrg).toBe(true);
   });
 
+  it("trusts a sandbox instance hostname over an incorrect CLI false value", () => {
+    const [org] = parseAuthenticatedOrgsResponse({
+      status: 0,
+      result: [
+        {
+          alias: "customerSandbox",
+          username: "admin@example.com.dev",
+          instanceUrl: "https://customer--dev.sandbox.my.salesforce.com",
+          isSandbox: false,
+        },
+      ],
+    });
+
+    expect(org.isSandbox).toBe(true);
+  });
+
+  it("keeps positive sandbox evidence when duplicate authorizations disagree", () => {
+    const [org] = parseAuthenticatedOrgsResponse({
+      status: 0,
+      result: [
+        { alias: "first", username: "admin@example.com.dev", orgId: "00Dsame", isSandbox: false },
+        { alias: "second", username: "admin@example.com.dev", orgId: "00Dsame", isSandbox: true },
+      ],
+    });
+
+    expect(org.isSandbox).toBe(true);
+  });
+
   it("ignores malformed entries without dropping valid orgs", () => {
     const orgs = parseAuthenticatedOrgsResponse({
       status: 0,

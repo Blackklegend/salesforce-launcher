@@ -55,7 +55,9 @@ The primary action opens the selected org. The action panel also includes:
 | <kbd>⌘</kbd> <kbd>C</kbd>              | Copy the primary alias, or username when no alias exists |
 | <kbd>⌘</kbd> <kbd>R</kbd>              | Refresh Orgs                                             |
 
-Copy actions for usernames, org IDs, instance URLs, and additional aliases appear only when those values exist.
+Use **Rename Display Name** to give any org a friendlier name in the browse list. Display names are stored locally and do not change the Salesforce CLI alias or login target; **Reset Display Name** restores the CLI-provided label. Renamed orgs remain searchable by both their display name and original aliases.
+
+In the extension preferences, **Environment Section Order** controls whether Sandboxes or Production appears first. Copy actions for usernames, org IDs, instance URLs, and additional aliases appear only when those values exist.
 
 ## Move authenticated orgs to another Mac
 
