@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
-import { delimiter, dirname } from "node:path";
+import { existsSync } from "node:fs";
+import { delimiter, dirname, extname, join, win32 } from "node:path";
 
 export interface ExecutableResult {
   stdout: string;
@@ -17,6 +18,11 @@ export type ExecutableRunner = (
   arguments_: readonly string[],
   options?: ExecutableOptions,
 ) => Promise<ExecutableResult>;
+
+interface ExecutableInvocation {
+  executable: string;
+  arguments: readonly string[];
+}
 
 export class ExecutableError extends Error {
   constructor(
@@ -43,7 +49,13 @@ export function buildSafeCliEnvironment(
 
   if (executable) {
     const executableDirectory = dirname(executable);
-    const inheritedPath = environment.PATH ?? "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+    const pathKeys = Object.keys(environment).filter((key) => key.toLowerCase() === "path");
+    const inheritedPath =
+      pathKeys.map((key) => environment[key]).find((value): value is string => typeof value === "string") ??
+      (process.platform === "win32"
+        ? "C:\\Windows\\System32;C:\\Windows"
+        : "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin");
+    for (const key of pathKeys) delete environment[key];
     const pathEntries = inheritedPath.split(delimiter).filter(Boolean);
     environment.PATH = [executableDirectory, ...pathEntries.filter((entry) => entry !== executableDirectory)].join(
       delimiter,
@@ -63,11 +75,51 @@ export function buildSafeCliEnvironment(
   };
 }
 
+export function resolveExecutableInvocation(
+  executable: string,
+  arguments_: readonly string[],
+  options: {
+    platform?: NodeJS.Platform;
+    fileExists?: (path: string) => boolean;
+    nodeExecutable?: string;
+  } = {},
+): ExecutableInvocation {
+  const platform = options.platform ?? process.platform;
+  const pathApi = platform === "win32" ? win32 : { dirname, extname, join };
+  const extension = pathApi.extname(executable).toLowerCase();
+  if (platform !== "win32" || (extension !== ".cmd" && extension !== ".bat")) {
+    return { executable, arguments: arguments_ };
+  }
+
+  // Windows cannot execute .cmd/.bat files with execFile(). Salesforce's
+  // supported shims all delegate to a JavaScript entry point, so invoke that
+  // entry point with Node instead of introducing a shell and its injection risk.
+  const executableDirectory = pathApi.dirname(executable);
+  const runnerCandidates = [
+    pathApi.join(executableDirectory, "node_modules", "@salesforce", "cli", "bin", "run.js"),
+    pathApi.join(executableDirectory, "node_modules", "@salesforce", "cli", "bin", "run"),
+    pathApi.join(executableDirectory, "run.js"),
+    pathApi.join(executableDirectory, "run"),
+  ];
+  const runner = runnerCandidates.find(options.fileExists ?? existsSync);
+  if (!runner) {
+    throw new Error(
+      "The Salesforce CLI Windows command shim was found, but its Node.js entry point could not be located. Configure the path to sf.exe or reinstall Salesforce CLI.",
+    );
+  }
+
+  return {
+    executable: options.nodeExecutable ?? process.execPath,
+    arguments: [runner, ...arguments_],
+  };
+}
+
 export const runExecutable: ExecutableRunner = (executable, arguments_, options = {}) =>
   new Promise((resolve, reject) => {
+    const invocation = resolveExecutableInvocation(executable, arguments_);
     execFile(
-      executable,
-      [...arguments_],
+      invocation.executable,
+      [...invocation.arguments],
       {
         encoding: "utf8",
         env: buildSafeCliEnvironment(process.env, options.environment, executable),

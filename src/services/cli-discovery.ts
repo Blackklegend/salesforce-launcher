@@ -121,13 +121,14 @@ async function nodeManagerCandidates(
 
 function pathCandidates(pathEnvironment: string, platform: NodeJS.Platform): string[] {
   const separator = platform === "win32" ? ";" : ":";
-  const executableNames = platform === "win32" ? ["sf.exe", "sf.cmd", "sf.bat", "sf"] : ["sf"];
+  const executableNames = platform === "win32" ? ["sf.exe", "sf.cmd", "sf"] : ["sf"];
+  const joinPath = platform === "win32" ? win32.join : join;
 
   return pathEnvironment
     .split(separator)
     .map((directory) => directory.trim())
     .filter(Boolean)
-    .flatMap((directory) => executableNames.map((name) => join(directory, name)));
+    .flatMap((directory) => executableNames.map((name) => joinPath(directory, name)));
 }
 
 async function isExecutable(

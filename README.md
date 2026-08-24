@@ -59,17 +59,17 @@ Use **Rename Display Name** to give any org a friendlier name in the browse list
 
 In the extension preferences, **Environment Section Order** controls whether Sandboxes or Production appears first. Copy actions for usernames, org IDs, instance URLs, and additional aliases appear only when those values exist.
 
-## Move authenticated orgs to another Mac
+## Move authenticated orgs to another computer
 
 Run **Export Salesforce Org Credentials**, select the orgs you want, choose a parent directory, and confirm the security warning. Exportable non-scratch orgs are selected initially; scratch orgs are listed but unselected. SF Orgs creates a new owner-only folder containing one `.authurl` credential file per selected org and a matching `.alias` file when an alias exists. The folder path—not its contents—is copied to the clipboard.
 
-Copy that folder through a secure channel, then run **Import Salesforce Org Credentials** on the destination Mac. You can select one or more export folders or `.authurl` files, paste an absolute path or `file://` link, use a Finder-copied file directly from the clipboard, or paste a `force://` SFDX auth URL into the concealed field. SF Orgs scans the selected sources and presents a searchable checklist so you can choose exactly which credentials to import. Direct auth URLs are placed in a temporary owner-only file and removed immediately after Salesforce CLI reads it. Import uses Salesforce CLI's supported `sf org login sfdx-url --sfdx-url-file` flow. You can optionally delete each source credential and alias file immediately after its org imports successfully; files for failed imports are retained.
+Copy that folder through a secure channel, then run **Import Salesforce Org Credentials** on the destination computer. You can select one or more export folders or `.authurl` files, paste an absolute path or `file://` link, use a file copied from Finder or Explorer directly from the clipboard, or paste a `force://` SFDX auth URL into the concealed field. SF Orgs scans the selected sources and presents a searchable checklist so you can choose exactly which credentials to import. Direct auth URLs are placed in a temporary owner-only file and removed immediately after Salesforce CLI reads it. Import uses Salesforce CLI's supported `sf org login sfdx-url --sfdx-url-file` flow. You can optionally delete each source credential and alias file immediately after its org imports successfully; files for failed imports are retained.
 
 > **Security warning:** An `.authurl` file is a full-access credential, equivalent to a password and token. Never commit or upload an export. Keep it in a password vault, encrypted disk, or similarly protected channel, and delete it after the migration. Some authentication types, including JWT/certificate-based authorization, do not expose an SFDX auth URL and are skipped.
 
 ## Requirements
 
-- macOS
+- macOS or Windows
 - [Raycast](https://www.raycast.com/)
 - [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecli)
 - At least one locally authenticated Salesforce org
@@ -91,7 +91,7 @@ sf org list auth
 SF Orgs checks, in order:
 
 1. The optional **Salesforce CLI Path** extension preference
-2. Standard Apple Silicon and Intel Homebrew locations
+2. Standard Apple Silicon and Intel Homebrew locations on macOS
 3. Raycast's inherited `PATH`
 4. Common Volta, asdf, mise, fnm, pnpm, and NVM installations
 
@@ -103,6 +103,8 @@ If automatic discovery fails, open the extension preferences and enter the absol
 ```bash
 which sf
 ```
+
+On Windows, use `where.exe sf` instead. The extension supports both the native `sf.exe` installed by Salesforce and the `sf.cmd` shim created by a global npm installation.
 
 ## How it works
 
@@ -126,6 +128,17 @@ Normalized org metadata is cached for 45 seconds in Raycast's local encrypted st
 The extension disables Salesforce CLI telemetry, automatic update checks, and log-file output for its own short-lived child processes; it does not change your global CLI configuration.
 
 ## Troubleshooting
+
+### Missing executable. You might need to build the extension
+
+This is a Raycast development-extension error, not a Salesforce CLI error. From the extension directory, run:
+
+```bash
+npm install
+npm run dev
+```
+
+Keep the development command running for hot reloads. A one-time `npm run build` also generates the command executables.
 
 ### Salesforce CLI was not found
 
@@ -169,4 +182,4 @@ The test suite uses fixtures and mocked process execution. It never reads a deve
 
 ## Privacy
 
-SF Orgs runs entirely on your Mac. It does not call Salesforce APIs directly, transmit org metadata or credentials to another service, or display session IDs. Salesforce CLI remains the authority for authentication and URL generation. Credential export and import happen only when explicitly invoked and confirmed; auth URLs are written directly to owner-only files and are never cached, logged, or copied to the clipboard.
+SF Orgs runs entirely on your computer. It does not call Salesforce APIs directly, transmit org metadata or credentials to another service, or display session IDs. Salesforce CLI remains the authority for authentication and URL generation. Credential export and import happen only when explicitly invoked and confirmed; auth URLs are written directly to user-only files where the operating system supports POSIX modes and are never cached, logged, or copied to the clipboard.

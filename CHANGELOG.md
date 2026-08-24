@@ -13,3 +13,4 @@
 - Fix sandbox classification when Salesforce CLI incorrectly reports `isSandbox: false` for a sandbox hostname.
 - Add locally persisted org display names with rename and reset actions.
 - Add a preference to place Sandboxes before or after Production in the browse list.
+- Add Windows support, including native `sf.exe` and npm-installed `sf.cmd` Salesforce CLI launchers.

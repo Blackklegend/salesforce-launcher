@@ -58,6 +58,18 @@ describe("findSalesforceCliPath", () => {
     ).resolves.toBe(cli);
   });
 
+  it("discovers the Windows npm command shim from PATH", async () => {
+    const cli = "C:\\Users\\test\\AppData\\Roaming\\npm\\sf.cmd";
+    await expect(
+      findSalesforceCliPath({
+        pathEnvironment: "C:\\Windows\\System32;C:\\Users\\test\\AppData\\Roaming\\npm",
+        platform: "win32",
+        access: fakeAccess([cli]),
+        useCache: false,
+      }),
+    ).resolves.toBe(cli);
+  });
+
   it("fails with a dedicated error when no executable exists", async () => {
     await expect(
       findSalesforceCliPath({ pathEnvironment: "", access: fakeAccess([]), useCache: false }),

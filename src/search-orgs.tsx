@@ -201,7 +201,10 @@ function OrgListItem({
             <Action
               title="Open Org in Private Window"
               icon={Icon.Mask}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+              }}
               onAction={() => performOpen(org, { displayName: label, privateWindow: true })}
             />
             <Action

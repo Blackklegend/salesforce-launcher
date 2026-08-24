@@ -6,7 +6,8 @@
   "icon": "sf-orgs-icon.png",
   "author": "bl4ckk",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Developer Tools",
@@ -86,7 +87,7 @@
       "description": "Absolute path to the sf executable. Leave empty to detect it automatically.",
       "type": "textfield",
       "required": false,
-      "placeholder": "/opt/homebrew/bin/sf"
+      "placeholder": "Absolute path to sf executable"
     },
     {
       "name": "environmentSectionOrder",

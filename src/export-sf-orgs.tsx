@@ -217,7 +217,7 @@ function ExportDestinationForm({ selectedOrgs }: { selectedOrgs: SalesforceOrg[]
         </ActionPanel>
       }
     >
-      <Form.Description text="Creates .authurl files containing full-access Salesforce credentials. The new folder is restricted to your macOS user (0700); each credential file uses 0600 permissions." />
+      <Form.Description text="Creates .authurl files containing full-access Salesforce credentials. On macOS, the new folder is restricted to your user (0700) and each credential file uses 0600 permissions." />
       <Form.FilePicker
         id="parentDirectory"
         title="Save In"

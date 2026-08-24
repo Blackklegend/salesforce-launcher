@@ -108,7 +108,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description text="Choose files or folders, paste an absolute path or file:// link, or copy a file in Finder and use Import from Clipboard. Matching .alias files restore org aliases." />
+      <Form.Description text="Choose files or folders, paste an absolute path or file:// link, or copy a file in Finder or Explorer and use Import from Clipboard. Matching .alias files restore org aliases." />
       <Form.FilePicker
         id="inputLocations"
         title="Files or Folders"
